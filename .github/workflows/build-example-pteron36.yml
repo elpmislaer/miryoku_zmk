@@ -1,0 +1,31 @@
+name: Build Pteron36
+
+on:
+  workflow_dispatch:
+    inputs:
+      alphas:
+        type: choice
+        default: QWERTY
+        options:
+          - AZERTY
+          - BEAKL15
+          - CARPALX
+          - COLEMAK
+          - COLEMAKDH
+          - COLEMAKDHK
+          - DVORAK
+          - HALMAK
+          - MINIMAK
+          - MTGAP
+          - NORMAN
+          - QWERTY
+          - QWERTZ
+          - WORKMAN
+          - WORKMANP
+
+jobs:
+  build:
+    uses: manna-harbour/miryoku_zmk/.github/workflows/build-example.yml@master
+    with:
+      board: nice_nano_v2
+      shield: pteron36_left,pteron36_right
