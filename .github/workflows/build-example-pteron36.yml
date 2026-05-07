@@ -1,12 +1,53 @@
-name: 'Build Pteron36'
+name: Build Pteron36 Miryoku ZMK UF2s
 
 on:
   workflow_dispatch:
+    inputs:
+      keyboard:
+        description: 'Keyboard id'
+        required: true
+        default: 'pteron36'
+      shield:
+        description: 'Shield / MCU'
+        required: true
+        default: 'nice_nano'
+      split:
+        description: 'Split mode'
+        required: true
+        default: 'wireless'
+      layout:
+        description: 'Keymap layout'
+        required: true
+        default: 'miryoku'
 
 jobs:
   build:
-    uses: ./.github/workflows/main.yml
-    secrets: inherit
-    with:
-      board: '["nice_nano_v2"]'
-      shield: '["pteron36_left", "pteron36_right"]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set build inputs
+        run: |
+          echo "KEYBOARD=${{ github.event.inputs.keyboard }}" >> $GITHUB_ENV
+          echo "SHIELD=${{ github.event.inputs.shield }}" >> $GITHUB_ENV
+          echo "SPLIT=${{ github.event.inputs.split }}" >> $GITHUB_ENV
+          echo "LAYOUT=${{ github.event.inputs.layout }}" >> $GITHUB_ENV
+
+      - name: Run Miryoku ZMK build script
+        # The miryoku_zmk repo contains example workflows and build scripts.
+        # This step assumes the repo's build script reads KEYBOARD/SHIELD/SPLIT/LAYOUT env vars.
+        run: |
+          ./scripts/build_zmk.sh "${KEYBOARD}" "${SHIELD}" "${SPLIT}" "${LAYOUT}"
+        env:
+          KEYBOARD: ${{ env.KEYBOARD }}
+          SHIELD: ${{ env.SHIELD }}
+          SPLIT: ${{ env.SPLIT }}
+          LAYOUT: ${{ env.LAYOUT }}
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pteron36-uf2
+          path: build/artifacts/*.uf2
